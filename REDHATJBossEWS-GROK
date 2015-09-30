@@ -1,0 +1,57 @@
+###################################################
+# Sample Logstash v1.5.x Configuration for RedHat JBOSS EWS (Web Server) 2.0.1
+#
+####################################################
+# v1.0 Doug McClure 9/23/15 RedHat JBOSS EWS (Web Server) 2.0.1
+#
+####################################################
+
+################################################################################################################################################################
+
+# RedHat JBOSS EWS Logs - *access.log
+# No multiline messages seen in provided samples
+
+#10.0.0.1 - - [21/Sep/2015:00:00:00 -0700] "STATUS / HTTP/1.1" 200 85
+#10.0.0.1 - - [21/Sep/2015:00:00:00 -0700] "GET / HTTP/1.1" 200 1276
+#10.0.0.1 - - [21/Sep/2015:00:00:01 -0700] "STATUS / HTTP/1.1" 200 85
+
+JBOSSEWSACCESS %{IPORHOST:clientip}\s+%{USER:ident}\s+%{USER:auth}\s+\[%{HTTPDATE:origTimestamp}\]\s+"(?:%{WORD:verb}\s+%{NOTSPACE:request}(?: HTTP/%{NUMBER:httpversion})?|%{DATA:rawrequest})"\s+%{NUMBER:response}\s+(?:%{GREEDYDATA:bytes}|-)
+
+################################################################################################################################################################
+
+# RedHat JBOSS EWS Logs - *ssl_request.log
+# no multiline messages seen in provided samples
+
+#[21/Sep/2015:00:00:00 -0700] 10.0.0.2 TLSv1 AES128-SHA "GET /grandslam/javax.faces.resource/images/ui-bg_0_aaaaaa_40x100.png.jsf?ln=ps-single HTTP/1.1" -
+#[21/Sep/2015:00:00:00 -0700] 10.0.0.2 TLSv1 AES128-SHA "POST /grandslam/ABC/efer.jsf HTTP/1.1" 8647
+#[21/Sep/2015:00:00:00 -0700] 10.0.0.3 TLSv1 RC4-MD5 "GET /" 1276
+#[21/Sep/2015:00:00:01 -0700] 10.0.0.2 TLSv1 AES128-SHA "GET /grandslam/javax.faces.resource/theme.css.jsf?ln=pes-single HTTP/1.1" -
+
+SSLREQTIME %{MONTHDAY}/%{MONTH}/%{YEAR}:%{HOUR}:%{MINUTE}:%{SECOND}\s+%{DATA}
+SSLREQ1 \[%{SSLREQTIME:origTimestamp}\]\s+%{IPORHOST:clientip}\s+%{DATA:TLSVer}\s+%{DATA:CryptoVer}\s+"%{WORD:verb}\s+%{NOTSPACE:request}\s+HTTP/%{NUMBER:httpversion}"\s+(?:%{GREEDYDATA:bytes}|-)
+SSLREQ2 \[%{SSLREQTIME:origTimestamp}\]\s+%{IPORHOST:clientip}\s+%{DATA:TLSVer}\s+%{DATA:CryptoVer}\s+"%{WORD:verb}\s+%{NOTSPACE:request}"\s+(?:%{GREEDYDATA:bytes}|-) 
+
+################################################################################################################################################################
+
+# RedHat JBOSS EWS Logs - *ssl_access.log (same JBOSS EWS Logs - *access.log above)
+# no multiline messages seen in provided samples
+
+#10.0.0.2 - - [21/Sep/2015:00:00:00 -0700] "GET /grandslam/javax.faces.resource/images/ui-bg_0_aaaaaa_40x100.png.jsf?ln=ps-single HTTP/1.1" 304 -
+#10.0.0.2 - - [21/Sep/2015:00:00:00 -0700] "POST /grandslam/ABC/Rer.jsf HTTP/1.1" 200 8647
+#10.0.0.3 - - [21/Sep/2015:00:00:00 -0700] "GET /" 200 1276
+#10.0.0.2 - - [21/Sep/2015:00:00:01 -0700] "GET /grandslam/javax.faces.resource/theme.css.jsf?ln=ps-single HTTP/1.1" 304 -
+#10.0.0.2 - - [21/Sep/2015:00:00:01 -0700] "GET /grandslam/javax.faces.resource/jquery/jquery.js.jsf?ln=pres&v=3.5.21 HTTP/1.1" 304 -
+
+################################################################################################################################################################
+
+# RedHat JBOSS EWS Logs - *ssl_error.log
+# no multiline messages seen in provided samples
+
+#[Tue Sep 22 00:01:15 2015] [error] [client 10.0.0.2] File does not exist: /opt/httpd/jboss-ews-2.0.1/httpd/www/html/favicon.ico, referer: https://foo.bar.com/grandslam
+#[Tue Sep 22 00:02:07 2015] [error] [client 10.0.0.2] File does not exist: /opt/httpd/jboss-ews-2.0.1/httpd/www/html/favicon.ico, referer: https://foo.bar.com/pcn/private/searfoo.jsf
+#[Tue Sep 22 00:02:32 2015] [error] [client 10.0.0.2] File does not exist: /opt/httpd/jboss-ews-2.0.1/httpd/www/html/favicon.ico
+#[Tue Sep 22 00:04:04 2015] [error] [client 10.0.0.2] File does not exist: /opt/httpd/jboss-ews-2.0.1/httpd/www/html/favicon.ico, referer: https://foo.bar.com/grandslam/ABC/Mfoos.jsf?quoteId=107
+
+SSLREQERRTIME %{DAY}\s+%{MONTH}\s+%{MONTHDAY}\s+%{HOUR}:%{MINUTE}:%{SECOND}\s+%{YEAR}
+
+SSLREQERR1 \[%{SSLREQERRTIME:origTimestamp}\]\s+\[%{DATA:logLevel}\]\s+\[client\s+%{DATA:clientIP}\]\s+%{GREEDYDATA:origMessage}
